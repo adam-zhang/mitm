@@ -1,0 +1,12 @@
+prefix=@mitm_PKGCONFIG_PREFIX_DIR@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: mitm
+Description: Man-In-The-Middle is an integer programming heuristic developed by Dag Wedelin.
+Requires: eigen3
+Version: @mitm_VERSION@
+Libs: -L${libdir} -lmitm-@mitm_STABLEVERSION@
+Libs.private: -lm -lpthread
+Cflags: -I${includedir}/mitm-@mitm_STABLEVERSION@
