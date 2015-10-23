@@ -1,9 +1,8 @@
 Here's a short list of things we can do
 ---------------------------------------
 
-* Remove the wedelin_state, useless.
-
-* Add option to maximize or minimize the optimization algorithm.
-
-* Improve compilation time and the API stability, switch the
-  in mitm/mitm.hpp. More template? Mode C API?
+- Remove the wedelin\_state, useless.
+- Add option to select the maximize/minimize for the optimization
+  algorithm.
+- Improve compilation time and the API stability, switch the in
+  mitm/mitm.hpp. More template? Mode C API?

@@ -132,42 +132,4 @@ std::istream &operator>>(std::istream &is, mitm::SimpleState &s)
     return is;
 }
 
-std::ostream &operator<<(std::ostream &os, const mitm::SimpleState &s)
-{
-    mitm::index m = static_cast<mitm::index>(s.b.size());
-    mitm::index n = static_cast<mitm::index>(s.c.size());
-
-    Expects(s.a.size() == static_cast<std::size_t>(m * n) &&
-            s.b.size() == static_cast<std::size_t>(m) &&
-            s.c.size() == static_cast<std::size_t>(n), " A, b or c not defined");
-
-    os << m << ' ' << n << '\n';
-
-    for (auto v : s.a)
-        os << v << ' ';
-
-    os << '\n';
-
-    for (auto v : s.b)
-        os << v << ' ';
-
-    os << '\n';
-
-    for (auto v : s.c)
-        os << v << ' ';
-
-    return os << '\n';
-}
-
-std::ostream &operator<<(std::ostream &os, const result &s)
-{
-    os << "total loop needed: " << s.loop
-       << " solution: \n";
-
-    for (auto v : s.x)
-        os << v << ' ';
-
-    return os;
-}
-
 }

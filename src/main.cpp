@@ -137,6 +137,11 @@ main(int argc, char *argv[])
             mitm::SimpleState state;
             ifs >> state;
 
+            if (ifs.fail()) {
+                std::cerr << "/!\\ fail: to read SimpleState\n";
+                continue;
+            }
+
             if (option_method == "default") {
                 mitm::default_algorithm(state, option_limit, std::string{});
             } else {

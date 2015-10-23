@@ -21,12 +21,11 @@
  */
 
 #include <mitm/mitm.hpp>
-#include <iostream>
 #include <iterator>
 #include <Eigen/Core>
+#include "cstream.hpp"
 #include "internal.hpp"
 #include "assert.hpp"
-#include "log.hpp"
 
 namespace mitm {
 namespace classic {
@@ -316,6 +315,21 @@ heuristic_algorithm_default(const SimpleState &s, index limit,
             s.a.size() == s.b.size() * s.c.size(),
             "heuristic_algorithm_default: state not initialized");
 
+    mitm::out() << "heuristic_algorithm_default start:\n"
+                << "constraints: " << mitm::out().yellow() << s.b.size()
+                << mitm::out().reset()
+                << " variables: " << mitm::out().yellow() << s.c.size()
+                << mitm::out().reset()
+                << "\nlimit: " << mitm::out().yellow()
+                << limit << mitm::out().reset()
+                << " kappa: " << mitm::out().yellow()
+                << kappa << mitm::out().reset()
+                << " delta: " << mitm::out().yellow()
+                << delta << mitm::out().reset()
+                << " theta: " << mitm::out().yellow()
+                << theta << mitm::out().reset()
+                << "\n";
+
     mitm::classic::wedelin_heuristic wh(
         s,
         static_cast<mitm::index>(s.b.size()),
@@ -346,6 +360,7 @@ heuristic_algorithm(const NegativeCoefficient& s, index limit,
                     const std::string &impl)
 {
     (void)impl;
+
     Expects(s.b.size() > 0 && s.c.size() > 0 &&
             s.a.size() == s.b.size() * s.c.size(),
             "heuristic_algorithm_default: state not initialized");

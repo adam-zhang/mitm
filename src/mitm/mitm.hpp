@@ -148,8 +148,6 @@ struct result
 };
 
 MITM_API std::istream &operator>>(std::istream &is, SimpleState &s);
-MITM_API std::ostream &operator<<(std::ostream &os, const SimpleState &s);
-MITM_API std::ostream &operator<<(std::ostream &os, const result &s);
 
 MITM_API result
 default_algorithm(const SimpleState &s, index limit,

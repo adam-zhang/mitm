@@ -51,7 +51,7 @@ endif ()
 ## Core library
 #
 
-set(libmitm_cxx_flags "-fvisibility=hidden -fvisibility-inlines-hidden")
+set(libmitm_cxx_flags "")
 set(libmitm_cxx_libs "")
 
 if (CUDA_FOUND)
@@ -59,6 +59,8 @@ if (CUDA_FOUND)
 endif ()
 
 set(mitm_library_sources_cpp
+  src/cstream.cpp
+  src/cstream.hpp
   src/heuristic-classic.cpp
   src/internal.hpp
   src/io.cpp
@@ -107,7 +109,7 @@ install(FILES ${PROJECT_BINARY_DIR}/mitm-${mitm_STABLEVERSION}.pc
 ## Core program
 #
 
-set(mitm_cxx_flags "-fvisibility=hidden -fvisibility-inlines-hidden")
+set(mitm_cxx_flags "")
 set(mitm_cxx_libs "")
 
 if (CUDA_FOUND)

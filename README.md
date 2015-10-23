@@ -12,7 +12,6 @@ using C++11, Eigen3 or Cuda.
 
 ## Requirements
 
-* boost (≥ 1.50)
 * eigen3 (≥ 3)
 * cmake (≥ 2.8)
 * make (≥ 1.8)

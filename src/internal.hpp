@@ -23,7 +23,6 @@
 #ifndef FR_INRA_MITM_INTERNAL_HPP
 #define FR_INRA_MITM_INTERNAL_HPP
 
-#include <iostream>
 #include <string>
 
 namespace mitm {

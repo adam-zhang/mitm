@@ -21,17 +21,26 @@
  */
 
 #include <mitm/mitm.hpp>
-#include <iostream>
+#include "cstream.hpp"
 #include "internal.hpp"
 
 namespace mitm {
 
 #ifndef MITM_HAVE_CUDA
 mitm::result
-heuristic_algorithm_gpgu(const state &s, index limit, float kappa, float delta, float theta)
+heuristic_algorithm_gpgu(const SimpleState&s, index limit, float kappa,
+                         float delta, float theta)
 {
-    std::cerr << "heuristic_algorithm_gpgu() is unavailable. "
-              "Install cuda package and rerun CMake\n";
+    (void)s;
+    (void)limit;
+    (void)kappa;
+    (void)delta;
+    (void)theta;
+
+    out() << "heuristic_algorithm_gpgu is unavailable. "
+        "Install cuda package and rerun CMake\n";
+
+    return mitm::result{};
 }
 #endif
 
@@ -39,9 +48,13 @@ mitm::result
 default_algorithm(const SimpleState &s, index limit,
                   const std::string &impl)
 {
-    if (not impl.empty())
-        std::cout << impl
-                  << " not defined for default algorithm. Back to classic\n";
+    if (not impl.empty()) {
+        out().printf("%s is undefined for the default algorithm. Back to"
+                     " classic implementation\n", impl.c_str());
+    }
+
+    out().printf("default_algorithm using the `%s' implementation\n",
+                 impl.c_str());
 
     return default_algorithm_default(s, limit);
 }
@@ -51,6 +64,12 @@ heuristic_algorithm(const SimpleState &s, index limit,
                     float kappa, float delta, float theta,
                     const std::string &impl)
 {
+    cstream cs(-27);
+    cs << "hello\n";
+
+    out().printf("heuristic_algorithm using the `%s' implementation\n",
+                 impl.c_str());
+
     if (impl == "gpgpu")
         return heuristic_algorithm_gpgu(s, limit, kappa, delta, theta);
 
