@@ -21,39 +21,46 @@
  */
 
 #include <mitm/mitm.hpp>
-#include <iterator>
 #include <Eigen/Core>
+#include <iterator>
 #include "cstream.hpp"
 #include "internal.hpp"
 #include "assert.hpp"
 
 namespace mitm {
-namespace classic {
-
+namespace negative {
 struct constraint
 {
     std::vector<mitm::index> I;
+    std::vector<mitm::index> C;
     std::vector<std::tuple<float, mitm::index>> r;
     mitm::index k;
     mitm::index n;
-    mitm::index bk;
+    float bk_lower_bound;
+    float bk_upper_bound;
 
     constraint() = default;
 
-    constraint(mitm::index k_, mitm::index n_, mitm::index bk_,
+    constraint(mitm::index k_, mitm::index n_,
+               float bk_lower_bound_, float bk_upper_bound_,
                const Eigen::MatrixXi& a)
         : k(k_)
-        , bk(bk_)
+        , bk_lower_bound(bk_lower_bound_)
+        , bk_upper_bound(bk_upper_bound_)
     {
         for (mitm::index i = 0; i != n_; ++i) {
             if (a(k, i) != 0) {
                 I.emplace_back(i);
+
+                if (a(k, i) < 0)           // Find variables with negative
+                    C.emplace_back(i);     // coefficient.
+
                 r.emplace_back(0, i);
             }
         }
     }
 
-    void update(const Eigen::MatrixXi& A, const Eigen::RowVectorXf& c,
+    void update(Eigen::MatrixXi& A, const Eigen::RowVectorXf& c,
                 Eigen::MatrixXf& P, Eigen::VectorXf& pi, Eigen::VectorXi& x,
                 float kappa, float l, float theta)
     {
@@ -73,6 +80,33 @@ struct constraint
                                    I[i]);
         }
 
+        auto bk_lower_bound_tmp = bk_lower_bound;
+        auto bk_upper_bound_tmp = bk_upper_bound;
+
+        if (not C.empty()) {
+            // Find variable with negative coefficient and negate reduced
+            // costs and coefficients of these variables.
+            for (mitm::index i : C) {
+                std::get<0>(r[i]) = -std::get<0>(r[i]);
+                A(k, i) = -A(k, i);
+                P(k, i) = -P(k, i);
+            }
+
+            // TODO u(i) = 1 now but we need to update the state structure
+            // to insert a u(i) to handle general bounded integer variable
+            // (see. 3.1 Bastert).
+            float sum = 0;
+            for (mitm::index i : C)
+                sum += A(k, i) * (1);
+
+            bk_lower_bound_tmp += sum;
+            bk_upper_bound_tmp += sum;
+        }
+
+        //
+        // End of update
+        //
+
         std::sort(r.begin(), r.end(),
                   [](const std::tuple<float, mitm::index>& lhs,
                      const std::tuple<float, mitm::index>& rhs)
@@ -80,26 +114,56 @@ struct constraint
                       return std::get<0>(lhs) < std::get<0>(rhs);
                   });
 
-        pi(k) += (std::get<0>(r[bk - 1]) + std::get<0>(r[bk])) / 2.0;
-        const float delta = ((kappa / (1 - kappa)) * (std::get<0>(r[bk - 1])
-                                                      - std::get<0>(r[bk]))
-                             + l);
+        std::vector<std::tuple<float, mitm::index>> computer;
+        std::vector<std::tuple<float, mitm::index>> no_computer;
 
-        for (mitm::index j = 0; j < bk; ++j) {
-            x(std::get<1>(r[j])) = 1;
-            P(k, std::get<1>(r[j])) -= +delta;
+        for (auto& sr : r) {
+            if (std::get<0>(sr) >= bk_lower_bound_tmp and
+                std::get<0>(sr) <= bk_upper_bound_tmp)
+                computer.emplace_back(sr);
+            else
+                no_computer.emplace_back(sr);
         }
 
-        for (mitm::index j = bk; j != static_cast<mitm::index>(I.size()); ++j) {
-            x(std::get<1>(r[j])) = 0;
-            P(k, std::get<1>(r[j])) -= -delta;
+        assert(computer.size() >= 2);
+
+        const auto& max_1 = computer[computer.size() - 1];
+        const auto& max_2 = computer[computer.size() - 2];
+
+        pi(k) += (std::get<0>(max_1) + std::get<0>(max_2)) / 2.0;
+
+        const float delta = ((kappa / (1 - kappa)) * (
+                                 std::get<0>(max_1) -
+                                 std::get<0>(max_2))) + l;
+
+        for (const auto& sr : computer) {
+            x(std::get<1>(sr)) = 1;
+            P(k, std::get<1>(sr)) -= +delta;
+        }
+
+        for (const auto& sr : no_computer) {
+            x(std::get<1>(sr)) = 0;
+            P(k, std::get<1>(sr)) -= -delta;
+        }
+
+        // clean up: correct negated costs and adjust value of negated
+        // variables.
+        for (mitm::index i : C) {
+            A(k, i) = -A(k, i);
+            P(k, i) = -P(k, i);
+
+            // TODO u(i) = 1 now but we need to update the state structure
+            // to insert a u(i) to handle general bounded integer variable
+            // (see. 3.1 Bastert).
+            x(i) = (1) - x(i);
         }
     }
 
     friend std::ostream&
         operator<<(std::ostream& os, const constraint& c)
         {
-            os << "k: " << c.k << " n: " << c.n << " bk: " << c.bk << '\n';
+            os << "k: " << c.k << " n: " << c.n << " bk: " << c.bk_lower_bound
+               << ' ' << c.bk_upper_bound << '\n';
             os << "I: ";
             std::copy(c.I.cbegin(), c.I.cend(),
                       std::ostream_iterator<mitm::index>(os, " "));
@@ -112,11 +176,11 @@ struct constraint
         }
 };
 
-struct wedelin_heuristic
+struct wedelin_heuristic_with_negative_coeff
 {
     std::vector <constraint> constraints;
     Eigen::MatrixXi A;
-    Eigen::VectorXi b;
+    std::vector <NegativeCoefficient::b_bounds> b;
     Eigen::RowVectorXf c;
     Eigen::VectorXi x;
     Eigen::MatrixXf P;
@@ -127,11 +191,12 @@ struct wedelin_heuristic
     float l;
     float theta;
 
-    wedelin_heuristic(const SimpleState &s, mitm::index m_, mitm::index n_,
-                      float k_, float l_, float theta_)
+    wedelin_heuristic_with_negative_coeff(const NegativeCoefficient &s,
+                                          mitm::index m_, mitm::index n_,
+                                          float k_, float l_, float theta_)
         : constraints(m_)
         , A(Eigen::MatrixXi::Zero(m_, n_))
-        , b(Eigen::VectorXi::Zero(m_))
+        , b(s.b)
         , c(Eigen::RowVectorXf::Zero(n_))
         , x(Eigen::VectorXi::Zero(n_))
         , P(Eigen::MatrixXf::Zero(m_, n_))
@@ -149,10 +214,6 @@ struct wedelin_heuristic
                     A(i, j) = s.a[longi];
         }
 
-        for (mitm::index i = 0; i != m; ++i) {
-            b(i) = s.b[i];
-        }
-
         for (mitm::index j = 0; j != n; ++j) {
             c(j) = s.c[j];
             x(j) = c(j) <= 0;
@@ -165,7 +226,9 @@ struct wedelin_heuristic
 
         constraints.clear();
         for (mitm::index i = 0; i != m; ++i)
-            constraints.emplace_back(i, n, b(i), A);
+            constraints.emplace_back(i, n,
+                                     b[i].lower_bound, b[i].upper_bound,
+                                     A);
     }
 
     inline bool
@@ -176,7 +239,7 @@ struct wedelin_heuristic
         for (mitm::index i = 0; i != n; ++i)
             sum += A(k, i) * x(i);
 
-        return sum != b(k);
+        return b[k].lower_bound <= sum and sum <= b[k].upper_bound;
     }
 
     bool next()
@@ -185,59 +248,26 @@ struct wedelin_heuristic
             if (is_constraint_need_update(k))
                 constraints[k].update(A, c, P, pi, x, kappa, l, theta);
 
-        if (is_ax_equal_b())
-            return true;
-
         // TODO: adjust parameters kappa, delta, theta
 
         return false;
-    }
-
-    friend std::ostream&
-        operator<<(std::ostream &os, const wedelin_heuristic &wh)
-        {
-            return os << "A:\n" << wh.A << '\n'
-                      << "P:\n" << wh.P << '\n'
-                      << "pi: " << wh.pi.transpose() << '\n'
-                      << "b: " << wh.b.transpose() << '\n'
-                      << "c: " << wh.c << '\n'
-                      << "X: " << wh.x.transpose() << '\n'
-                      << "(Ax): "<< (wh.A * wh.x).transpose() << '\n';
-        }
-
-private:
-    bool is_ax_equal_b() const
-    {
-        return (A * x) == b;
     }
 };
 
 }
 
 mitm::result
-heuristic_algorithm_default(const SimpleState &s, index limit,
-                            float kappa, float delta, float theta)
+heuristic_algorithm_default(const NegativeCoefficient& s, index limit,
+                            float kappa, float delta, float theta,
+                            const std::string &impl)
 {
+    (void)impl;
+
     Expects(s.b.size() > 0 && s.c.size() > 0 &&
             s.a.size() == s.b.size() * s.c.size(),
             "heuristic_algorithm_default: state not initialized");
 
-    mitm::out() << "heuristic_algorithm_default start:\n"
-                << "constraints: " << mitm::out().yellow() << s.b.size()
-                << mitm::out().reset()
-                << " variables: " << mitm::out().yellow() << s.c.size()
-                << mitm::out().reset()
-                << "\nlimit: " << mitm::out().yellow()
-                << limit << mitm::out().reset()
-                << " kappa: " << mitm::out().yellow()
-                << kappa << mitm::out().reset()
-                << " delta: " << mitm::out().yellow()
-                << delta << mitm::out().reset()
-                << " theta: " << mitm::out().yellow()
-                << theta << mitm::out().reset()
-                << "\n";
-
-    mitm::classic::wedelin_heuristic wh(
+    mitm::negative::wedelin_heuristic_with_negative_coeff wh(
         s,
         static_cast<mitm::index>(s.b.size()),
         static_cast<mitm::index>(s.c.size()),
@@ -260,5 +290,6 @@ heuristic_algorithm_default(const SimpleState &s, index limit,
 
     throw std::runtime_error("no solution founded");
 }
+
 
 }

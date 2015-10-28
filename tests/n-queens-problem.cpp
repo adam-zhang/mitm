@@ -69,29 +69,36 @@ public:
 
     bool run(mitm::index limit, float kappa, float delta, float theta)
     {
-        try {
-            mitm::result r(mitm::heuristic_algorithm(state, limit, kappa, delta,
-                                                     theta, std::string{}));
+        (void)limit;
+        (void)kappa;
+        (void)delta;
+        (void)theta;
 
-            std::cout << "solution founded in " << r.loop << " loops !\n";
-            for (mitm::index i = 0; i != n; ++i) {
-                std::cout << r.x[i] << ' ';
-                if ((i + 1) % (m / 2) == 0)
-                    std::cout << '\n';
-            }
-            std::cout << '\n';
+        return false;
+    //     try {
+    //         mitm::result r(mitm::heuristic_algorithm(
+    //                            state, limit, kappa, delta,
+    //                            theta, std::string{}));
 
-            for (mitm::index i = 0; i != n; ++i) {
-                std::cout << state.c[i] << ' ';
-                if ((i + 1) % (m / 2) == 0)
-                    std::cout << '\n';
-            }
-            std::cout << '\n';
-            return true;
-        } catch (const std::exception& e) {
-            std::cerr << "mitm error:" << e.what() << '\n';
-            return false;
-        }
+    //         std::cout << "solution founded in " << r.loop << " loops !\n";
+    //         for (mitm::index i = 0; i != n; ++i) {
+    //             std::cout << r.x[i] << ' ';
+    //             if ((i + 1) % (m / 2) == 0)
+    //                 std::cout << '\n';
+    //         }
+    //         std::cout << '\n';
+
+    //         for (mitm::index i = 0; i != n; ++i) {
+    //             std::cout << state.c[i] << ' ';
+    //             if ((i + 1) % (m / 2) == 0)
+    //                 std::cout << '\n';
+    //         }
+    //         std::cout << '\n';
+    //         return true;
+    //     } catch (const std::exception& e) {
+    //         std::cerr << "mitm error:" << e.what() << '\n';
+    //         return false;
+    //                 }
     }
 };
 
@@ -154,4 +161,3 @@ int main(int argc, char **argv)
 
     return (pb.run(limit, kappa, delta, theta)) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-

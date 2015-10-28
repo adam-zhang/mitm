@@ -150,10 +150,6 @@ struct result
 MITM_API std::istream &operator>>(std::istream &is, SimpleState &s);
 
 MITM_API result
-default_algorithm(const SimpleState &s, index limit,
-                  const std::string &impl);
-
-MITM_API result
 heuristic_algorithm(const SimpleState &s, index limit,
                     float kappa, float delta, float theta,
                     const std::string &impl);

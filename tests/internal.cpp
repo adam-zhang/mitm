@@ -20,25 +20,28 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef FR_INRA_MITM_INTERNAL_HPP
-#define FR_INRA_MITM_INTERNAL_HPP
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+#include "matrix.hpp"
+#include "io.hpp"
 
-#include <string>
+TEST_CASE("Matrix test", "[matrix]")
+{
+    std::vector <bool> a(5 * 2, false);
+    mitm::matrix_adapter <bool, std::vector<bool>> adapt(a, 5, 2);
 
-namespace mitm {
+    for (std::size_t i = 0, ei = adapt.rows(); i != ei; ++i)
+        for (std::size_t j = 0, ej = adapt.cols(); j != ej; ++j)
+            adapt(i, j) = true;
 
-mitm::result
-heuristic_algorithm_default(const SimpleState &s, index limit,
-                            float kappa, float delta, float theta);
+    auto it = std::find(a.cbegin(), a.cend(), false);
+    REQUIRE(it == a.cend());
 
-mitm::result
-heuristic_algorithm_default(const NegativeCoefficient& s, index limit,
-                            float kappa, float delta, float theta);
+    mitm::out() << adapt << "\n";
 
-mitm::result
-heuristic_algorithm_gpgu(const SimpleState &s, index limit,
-                         float kappa, float delta, float theta);
+    adapt(0, 0) = false;
+    adapt(1, 1) = false;
 
+    REQUIRE(a[0] == false);
+    REQUIRE(a[1 * 2 + 1] == false);
 }
-
-#endif

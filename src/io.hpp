@@ -20,25 +20,26 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef FR_INRA_MITM_INTERNAL_HPP
-#define FR_INRA_MITM_INTERNAL_HPP
+#ifndef FR_INRA_MITM_IO_HPP
+#define FR_INRA_MITM_IO_HPP
 
-#include <string>
+#include "matrix.hpp"
+#include "cstream.hpp"
 
 namespace mitm {
 
-mitm::result
-heuristic_algorithm_default(const SimpleState &s, index limit,
-                            float kappa, float delta, float theta);
+template <typename T, typename Container>
+cstream& operator<<(cstream& os, const matrix_adapter <T, Container>& m)
+{
+    for (std::size_t i = 0, ei = m.rows(); i != ei; ++i) {
+        for (std::size_t j = 0, ej = m.cols(); j != ej; ++j)
+            os << m(i, j) << " ";
+        os << "\n";
+    }
 
-mitm::result
-heuristic_algorithm_default(const NegativeCoefficient& s, index limit,
-                            float kappa, float delta, float theta);
-
-mitm::result
-heuristic_algorithm_gpgu(const SimpleState &s, index limit,
-                         float kappa, float delta, float theta);
-
+    return os;
 }
+
+} // namespace mitm
 
 #endif

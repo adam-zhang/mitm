@@ -33,7 +33,8 @@ macro (pkg_config_required_library LIBNAME pcfile)
   link_directories(${${LIBNAME}_LIBRARY_DIRS})
   add_definitions(${${LIBNAME}_CFLAGS_OTHER})
   set(mitm_LINK_LIBRARIES ${mitm_LINK_LIBRARIES} ${${LIBNAME}_LIBRARIES})
-  set(mitm_STATIC_LINK_LIBRARIES ${mitm_STATIC_LINK_LIBRARIES} ${${LIBNAME}_STATIC_LIBRARIES})
+  set(mitm_STATIC_LINK_LIBRARIES ${mitm_STATIC_LINK_LIBRARIES}
+    ${${LIBNAME}_STATIC_LIBRARIES})
 endmacro ()
 
 pkg_config_required_library(LIBEIGEN3 eigen3)
@@ -62,10 +63,12 @@ set(mitm_library_sources_cpp
   src/cstream.cpp
   src/cstream.hpp
   src/heuristic-classic.cpp
+  src/negative-coeff.cpp
   src/internal.hpp
+  src/io.hpp
   src/io.cpp
-  src/mitm.cpp
-  src/wedelin-default.cpp)
+  src/matrix.hpp
+  src/mitm.cpp)
 
 if (CUDA_FOUND)
   # Avoid std=c++11 in cuda's flags.
@@ -146,6 +149,9 @@ endmacro ()
 if (CATCH_INCLUDE_DIR)
   message(STATUS " found 'catch.hpp' in ${CATCH_INCLUDE_DIR}")
   include_directories(${CATCH_INCLUDE_DIR})
+
+  mitm_add_test_executable(internal tests/internal.cpp)
+  add_test(NAME internal COMMAND internal)
 
   mitm_add_test_executable(assigmement_problem tests/assignment_problem.cpp)
   add_test(NAME ap-01 COMMAND assignment_problem

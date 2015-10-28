@@ -142,12 +142,8 @@ main(int argc, char *argv[])
                 continue;
             }
 
-            if (option_method == "default") {
-                mitm::default_algorithm(state, option_limit, std::string{});
-            } else {
-                mitm::heuristic_algorithm(state, option_limit, delta,
-                                          kappa, theta, std::string{});
-            }
+            mitm::heuristic_algorithm(state, option_limit, delta,
+                                      kappa, theta, std::string{});
         } catch (const std::exception &e) {
             std::cerr << "/!\\ fail: " << e.what() << '\n';
         }

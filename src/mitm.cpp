@@ -45,21 +45,6 @@ heuristic_algorithm_gpgu(const SimpleState&s, index limit, float kappa,
 #endif
 
 mitm::result
-default_algorithm(const SimpleState &s, index limit,
-                  const std::string &impl)
-{
-    if (not impl.empty()) {
-        out().printf("%s is undefined for the default algorithm. Back to"
-                     " classic implementation\n", impl.c_str());
-    }
-
-    out().printf("default_algorithm using the `%s' implementation\n",
-                 impl.c_str());
-
-    return default_algorithm_default(s, limit);
-}
-
-mitm::result
 heuristic_algorithm(const SimpleState &s, index limit,
                     float kappa, float delta, float theta,
                     const std::string &impl)

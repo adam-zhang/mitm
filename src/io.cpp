@@ -132,4 +132,4 @@ std::istream &operator>>(std::istream &is, mitm::SimpleState &s)
     return is;
 }
 
-}
+} // namespace mitm
