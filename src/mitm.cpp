@@ -49,7 +49,7 @@ heuristic_algorithm(const SimpleState &s, index limit,
                     float kappa, float delta, float theta,
                     const std::string &impl)
 {
-    cstream cs(-27);
+    cstream cs(1);
     cs << "hello\n";
 
     out().printf("heuristic_algorithm using the `%s' implementation\n",
