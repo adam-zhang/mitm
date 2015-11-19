@@ -110,10 +110,40 @@ struct constraint
 
             return os << '\n';
         }
+
+
+    std::size_t size() const
+    {
+        return I.size() * sizeof(mitm::index) +
+            r.size() * sizeof(std::tuple<float, mitm::index>) +
+            3 * sizeof(mitm::index);
+    }
 };
 
 struct wedelin_heuristic
 {
+    std::size_t size() const
+    {
+        std::size_t ret = std::accumulate(
+            constraints.cbegin(),
+            constraints.cend(),
+            0.0, [](std::size_t init, const constraint& c)
+            {
+                return init + c.size();
+            });
+
+        ret += A.size() * sizeof(int) +
+            b.size() * sizeof(int) +
+            c.size() * sizeof(float) +
+            x.size() * sizeof(int) +
+            P.size() * sizeof(float) +
+            pi.size() * sizeof(float) +
+            2 * sizeof(index) +
+            3 * sizeof(float);
+
+        return ret;
+    }
+
     std::vector <constraint> constraints;
     Eigen::MatrixXi A;
     Eigen::VectorXi b;
@@ -222,6 +252,12 @@ heuristic_algorithm_default(const SimpleState &s, index limit,
             s.a.size() == s.b.size() * s.c.size(),
             "heuristic_algorithm_default: state not initialized");
 
+    mitm::classic::wedelin_heuristic wh(
+        s,
+        static_cast<mitm::index>(s.b.size()),
+        static_cast<mitm::index>(s.c.size()),
+        kappa, delta, theta);
+
     mitm::out() << "heuristic_algorithm_default start:\n"
                 << "constraints: " << mitm::out().yellow() << s.b.size()
                 << mitm::out().reset()
@@ -235,13 +271,15 @@ heuristic_algorithm_default(const SimpleState &s, index limit,
                 << delta << mitm::out().reset()
                 << " theta: " << mitm::out().yellow()
                 << theta << mitm::out().reset()
-                << "\n";
+                << "\n"
+                << "Memory allocated: " << mitm::out().yellow();
 
-    mitm::classic::wedelin_heuristic wh(
-        s,
-        static_cast<mitm::index>(s.b.size()),
-        static_cast<mitm::index>(s.c.size()),
-        kappa, delta, theta);
+    if (wh.size() < 1024)
+        mitm::out() << wh.size() << " B" << mitm::out().reset() << "\n";
+    else if (wh.size() < 1024 * 1024)
+        mitm::out() << (wh.size() / 1024.0) << " KB" << mitm::out().reset() << "\n";
+    else
+        mitm::out() << (wh.size() / (1024.0 * 1024.0)) << " MB" << mitm::out().reset() << "\n";
 
     for (long int it = 0; it != limit; ++it) {
         if (wh.next()) {
