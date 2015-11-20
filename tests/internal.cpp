@@ -37,11 +37,22 @@ TEST_CASE("Matrix test", "[matrix]")
     auto it = std::find(a.cbegin(), a.cend(), false);
     REQUIRE(it == a.cend());
 
-    mitm::out() << adapt << "\n";
+    mitm::out() << "Matrix:\n" << adapt << "\n";
 
     adapt(0, 0) = false;
     adapt(1, 1) = false;
 
     REQUIRE(a[0] == false);
     REQUIRE(a[1 * 2 + 1] == false);
+
+    for (std::size_t i = 0, ei = adapt.rows(); i != ei; ++i)
+        for (std::size_t j = 0, ej = adapt.cols(); j != ej; ++j)
+            adapt(i, j) = false;
+
+    it = std::find(a.cbegin(), a.cend(), true);
+    REQUIRE(it == a.cend());
+    REQUIRE(adapt.empty() == false);
+    REQUIRE(adapt.size() == static_cast<std::size_t>(10));
+    REQUIRE(adapt.rows() == static_cast<std::size_t>(5));
+    REQUIRE(adapt.cols() == static_cast<std::size_t>(2));
 }
