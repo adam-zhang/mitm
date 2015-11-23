@@ -56,3 +56,4 @@ TEST_CASE("Matrix test", "[matrix]")
     REQUIRE(adapt.rows() == static_cast<std::size_t>(5));
     REQUIRE(adapt.cols() == static_cast<std::size_t>(2));
 }
+

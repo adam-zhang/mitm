@@ -29,15 +29,18 @@ namespace mitm {
 
 mitm::result
 heuristic_algorithm_default(const SimpleState &s, index limit,
-                            float kappa, float delta, float theta);
+                            mitm::real kappa, mitm::real delta,
+                            mitm::real theta);
 
 mitm::result
 heuristic_algorithm_default(const NegativeCoefficient& s, index limit,
-                            float kappa, float delta, float theta);
+                            mitm::real kappa, mitm::real delta,
+                            mitm::real theta);
 
 mitm::result
 heuristic_algorithm_gpgu(const SimpleState &s, index limit,
-                         float kappa, float delta, float theta);
+                         mitm::real kappa, mitm::real delta,
+                         mitm::real theta);
 
 }
 

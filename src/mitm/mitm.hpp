@@ -75,10 +75,16 @@ private:
     int m_line;
 };
 
+#ifdef MITM_REAL_TYPE
+typedef MITM_REAL_TYPE real
+#else
+typedef float real;
+#endif
+
 typedef std::ptrdiff_t index;
 typedef std::vector<bool> A_type;
 typedef std::vector<int> b_type;
-typedef std::vector<float> c_type;
+typedef std::vector<real> c_type;
 typedef std::vector<int> x_type;
 
 class MITM_API SimpleState
@@ -93,7 +99,7 @@ public:
         } catch(const std::bad_alloc& e) {
             std::vector<bool>().swap(a);
             std::vector<int>().swap(b);
-            std::vector<float>().swap(c);
+            std::vector<real>().swap(c);
 
             throw std::runtime_error("not enough memory");
         }
@@ -101,15 +107,15 @@ public:
 
     std::vector<bool> a;
     std::vector<int> b;
-    std::vector<float> c;
+    std::vector<real> c;
 };
 
 class MITM_API NegativeCoefficient
 {
 public:
     struct b_bounds {
-        float lower_bound;
-        float upper_bound;
+        real lower_bound;
+        real upper_bound;
     };
 
     void init(index m, index n)
@@ -121,7 +127,7 @@ public:
         } catch(const std::bad_alloc& e) {
             std::vector<int>().swap(a);
             std::vector<b_bounds>().swap(b);
-            std::vector<float>().swap(c);
+            std::vector<real>().swap(c);
 
             throw std::runtime_error("not enough memory");
         }
@@ -135,7 +141,7 @@ public:
     std::vector<b_bounds> b;
 
     /// The cost vector.
-    std::vector<float> c;
+    std::vector<real> c;
 };
 
 struct result
@@ -151,12 +157,12 @@ MITM_API std::istream &operator>>(std::istream &is, SimpleState &s);
 
 MITM_API result
 heuristic_algorithm(const SimpleState &s, index limit,
-                    float kappa, float delta, float theta,
+                    real kappa, real delta, real theta,
                     const std::string &impl);
 
 MITM_API result
 heuristic_algorithm(const NegativeCoefficient& s, index limit,
-                    float kappa, float delta, float theta,
+                    real kappa, real delta, real theta,
                     const std::string &impl);
 
 }

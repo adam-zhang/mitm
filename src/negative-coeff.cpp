@@ -33,16 +33,16 @@ struct constraint
 {
     std::vector<mitm::index> I;
     std::vector<mitm::index> C;
-    std::vector<std::tuple<float, mitm::index>> r;
+    std::vector<std::tuple<mitm::real, mitm::index>> r;
     mitm::index k;
     mitm::index n;
-    float bk_lower_bound;
-    float bk_upper_bound;
+    mitm::real bk_lower_bound;
+    mitm::real bk_upper_bound;
 
     constraint() = default;
 
     constraint(mitm::index k_, mitm::index n_,
-               float bk_lower_bound_, float bk_upper_bound_,
+               mitm::real bk_lower_bound_, mitm::real bk_upper_bound_,
                const Eigen::MatrixXi& a)
         : k(k_)
         , bk_lower_bound(bk_lower_bound_)
@@ -62,13 +62,13 @@ struct constraint
 
     void update(Eigen::MatrixXi& A, const Eigen::RowVectorXf& c,
                 Eigen::MatrixXf& P, Eigen::VectorXf& pi, Eigen::VectorXi& x,
-                float kappa, float l, float theta)
+                mitm::real kappa, mitm::real l, mitm::real theta)
     {
         P.row(k) *= theta;
 
         for (mitm::index i = 0; i != static_cast<mitm::index>(I.size()); ++i) {
-            float sum_a_hi_pi_h = 0;
-            float sum_a_hi_p_hi = 0;
+            mitm::real sum_a_hi_pi_h = 0;
+            mitm::real sum_a_hi_p_hi = 0;
             for (mitm::index h = 0, endh = A.rows(); h != endh; ++h) {
                 if (A(h, i)) {
                     sum_a_hi_pi_h += A(h, I[i]) * pi(h);
@@ -95,7 +95,7 @@ struct constraint
             // TODO u(i) = 1 now but we need to update the state structure
             // to insert a u(i) to handle general bounded integer variable
             // (see. 3.1 Bastert).
-            float sum = 0;
+            mitm::real sum = 0;
             for (mitm::index i : C)
                 sum += A(k, i) * (1);
 
@@ -108,14 +108,14 @@ struct constraint
         //
 
         std::sort(r.begin(), r.end(),
-                  [](const std::tuple<float, mitm::index>& lhs,
-                     const std::tuple<float, mitm::index>& rhs)
+                  [](const std::tuple<mitm::real, mitm::index>& lhs,
+                     const std::tuple<mitm::real, mitm::index>& rhs)
                   {
                       return std::get<0>(lhs) < std::get<0>(rhs);
                   });
 
-        std::vector<std::tuple<float, mitm::index>> computer;
-        std::vector<std::tuple<float, mitm::index>> no_computer;
+        std::vector<std::tuple<mitm::real, mitm::index>> computer;
+        std::vector<std::tuple<mitm::real, mitm::index>> no_computer;
 
         for (auto& sr : r) {
             if (std::get<0>(sr) >= bk_lower_bound_tmp and
@@ -132,7 +132,7 @@ struct constraint
 
         pi(k) += (std::get<0>(max_1) + std::get<0>(max_2)) / 2.0;
 
-        const float delta = ((kappa / (1 - kappa)) * (
+        const mitm::real delta = ((kappa / (1 - kappa)) * (
                                  std::get<0>(max_1) -
                                  std::get<0>(max_2))) + l;
 
@@ -187,13 +187,13 @@ struct wedelin_heuristic_with_negative_coeff
     Eigen::VectorXf pi;
     index m;
     index n;
-    float kappa;
-    float l;
-    float theta;
+    mitm::real kappa;
+    mitm::real l;
+    mitm::real theta;
 
     wedelin_heuristic_with_negative_coeff(const NegativeCoefficient &s,
                                           mitm::index m_, mitm::index n_,
-                                          float k_, float l_, float theta_)
+                                          mitm::real k_, mitm::real l_, mitm::real theta_)
         : constraints(m_)
         , A(Eigen::MatrixXi::Zero(m_, n_))
         , b(s.b)
@@ -258,7 +258,8 @@ struct wedelin_heuristic_with_negative_coeff
 
 mitm::result
 heuristic_algorithm_default(const NegativeCoefficient& s, index limit,
-                            float kappa, float delta, float theta,
+                            mitm::real kappa, mitm::real delta,
+                            mitm::real theta,
                             const std::string &impl)
 {
     (void)impl;

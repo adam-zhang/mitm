@@ -33,7 +33,7 @@ namespace classic {
 struct constraint
 {
     std::vector<mitm::index> I;
-    std::vector<std::tuple<float, mitm::index>> r;
+    std::vector<std::tuple<mitm::real, mitm::index>> r;
     mitm::index k;
     mitm::index n;
     mitm::index bk;
@@ -55,13 +55,13 @@ struct constraint
 
     void update(const Eigen::MatrixXi& A, const Eigen::RowVectorXf& c,
                 Eigen::MatrixXf& P, Eigen::VectorXf& pi, Eigen::VectorXi& x,
-                float kappa, float l, float theta)
+                mitm::real kappa, mitm::real l, mitm::real theta)
     {
         P.row(k) *= theta;
 
         for (mitm::index i = 0; i != static_cast<mitm::index>(I.size()); ++i) {
-            float sum_a_hi_pi_h = 0;
-            float sum_a_hi_p_hi = 0;
+            mitm::real sum_a_hi_pi_h = 0;
+            mitm::real sum_a_hi_p_hi = 0;
             for (mitm::index h = 0, endh = A.rows(); h != endh; ++h) {
                 if (A(h, i)) {
                     sum_a_hi_pi_h += A(h, I[i]) * pi(h);
@@ -74,15 +74,15 @@ struct constraint
         }
 
         std::sort(r.begin(), r.end(),
-                  [](const std::tuple<float, mitm::index>& lhs,
-                     const std::tuple<float, mitm::index>& rhs)
+                  [](const std::tuple<mitm::real, mitm::index>& lhs,
+                     const std::tuple<mitm::real, mitm::index>& rhs)
                   {
                       return std::get<0>(lhs) < std::get<0>(rhs);
                   });
 
         pi(k) += (std::get<0>(r[bk - 1]) + std::get<0>(r[bk])) / 2.0;
-        const float delta = ((kappa / (1 - kappa)) * (std::get<0>(r[bk - 1])
-                                                      - std::get<0>(r[bk]))
+        const mitm::real delta = ((kappa / (1 - kappa)) *
+                                  (std::get<0>(r[bk - 1]) - std::get<0>(r[bk]))
                              + l);
 
         for (mitm::index j = 0; j < bk; ++j) {
@@ -111,11 +111,10 @@ struct constraint
             return os << '\n';
         }
 
-
     std::size_t size() const
     {
         return I.size() * sizeof(mitm::index) +
-            r.size() * sizeof(std::tuple<float, mitm::index>) +
+            r.size() * sizeof(std::tuple<mitm::real, mitm::index>) +
             3 * sizeof(mitm::index);
     }
 };
@@ -134,12 +133,12 @@ struct wedelin_heuristic
 
         ret += A.size() * sizeof(int) +
             b.size() * sizeof(int) +
-            c.size() * sizeof(float) +
+            c.size() * sizeof(mitm::real) +
             x.size() * sizeof(int) +
-            P.size() * sizeof(float) +
-            pi.size() * sizeof(float) +
+            P.size() * sizeof(mitm::real) +
+            pi.size() * sizeof(mitm::real) +
             2 * sizeof(index) +
-            3 * sizeof(float);
+            3 * sizeof(mitm::real);
 
         return ret;
     }
@@ -153,12 +152,12 @@ struct wedelin_heuristic
     Eigen::VectorXf pi;
     index m;
     index n;
-    float kappa;
-    float l;
-    float theta;
+    mitm::real kappa;
+    mitm::real l;
+    mitm::real theta;
 
     wedelin_heuristic(const SimpleState &s, mitm::index m_, mitm::index n_,
-                      float k_, float l_, float theta_)
+                      mitm::real k_, mitm::real l_, mitm::real theta_)
         : constraints(m_)
         , A(Eigen::MatrixXi::Zero(m_, n_))
         , b(Eigen::VectorXi::Zero(m_))
@@ -246,7 +245,7 @@ private:
 
 mitm::result
 heuristic_algorithm_default(const SimpleState &s, index limit,
-                            float kappa, float delta, float theta)
+                            mitm::real kappa, mitm::real delta, mitm::real theta)
 {
     Expects(s.b.size() > 0 && s.c.size() > 0 &&
             s.a.size() == s.b.size() * s.c.size(),
@@ -279,9 +278,10 @@ heuristic_algorithm_default(const SimpleState &s, index limit,
     else if (wh.size() < 1024 * 1024)
         mitm::out() << (wh.size() / 1024.0) << " KB" << mitm::out().reset() << "\n";
     else
-        mitm::out() << (wh.size() / (1024.0 * 1024.0)) << " MB" << mitm::out().reset() << "\n";
+        mitm::out() << (wh.size() / (1024.0 * 1024.0)) << " MB"
+            << mitm::out().reset() << "\n";
 
-    for (long int it = 0; it != limit; ++it) {
+    for (mitm::index it = 0; it != limit; ++it) {
         if (wh.next()) {
             mitm::result ret;
 

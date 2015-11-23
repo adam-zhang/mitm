@@ -119,8 +119,8 @@ public:
     bool run(mitm::index limit, float kappa, float delta, float theta)
     {
         try {
-            mitm::result r(mitm::heuristic_algorithm(state, limit, kappa, delta,
-                                                     theta, std::string{}));
+            mitm::result r = mitm::heuristic_algorithm(
+                state, limit, kappa, delta, theta, std::string{});
 
             std::cout << "solution founded in " << r.loop << " loops !\n";
             for (mitm::index i = 0; i != n; ++i) {

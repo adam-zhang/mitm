@@ -28,8 +28,8 @@ namespace mitm {
 
 #ifndef MITM_HAVE_CUDA
 mitm::result
-heuristic_algorithm_gpgu(const SimpleState&s, index limit, float kappa,
-                         float delta, float theta)
+heuristic_algorithm_gpgu(const SimpleState&s, index limit, mitm::real kappa,
+                         mitm::real delta, mitm::real theta)
 {
     (void)s;
     (void)limit;
@@ -46,14 +46,14 @@ heuristic_algorithm_gpgu(const SimpleState&s, index limit, float kappa,
 
 mitm::result
 heuristic_algorithm(const SimpleState &s, index limit,
-                    float kappa, float delta, float theta,
+                    mitm::real kappa, mitm::real delta, mitm::real theta,
                     const std::string &impl)
 {
     cstream cs(1);
-    cs << "hello\n";
 
-    out().printf("heuristic_algorithm using the `%s' implementation\n",
-                 impl.c_str());
+    if (not impl.empty())
+        out().printf("heuristic_algorithm using the `%s' implementation\n",
+                     impl.c_str());
 
     if (impl == "gpgpu")
         return heuristic_algorithm_gpgu(s, limit, kappa, delta, theta);

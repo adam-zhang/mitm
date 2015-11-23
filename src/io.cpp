@@ -127,7 +127,7 @@ std::istream &operator>>(std::istream &is, mitm::SimpleState &s)
         s.b[i] = ::next_token<int>(is, lineid);
 
     for (mitm::index i = 0; i != n; ++i)
-        s.c[i] = ::next_token<float>(is, lineid);
+        s.c[i] = ::next_token<mitm::real>(is, lineid);
 
     return is;
 }
