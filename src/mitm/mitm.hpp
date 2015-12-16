@@ -82,10 +82,6 @@ typedef float real;
 #endif
 
 typedef std::ptrdiff_t index;
-typedef std::vector<bool> A_type;
-typedef std::vector<int> b_type;
-typedef std::vector<real> c_type;
-typedef std::vector<int> x_type;
 
 class MITM_API SimpleState
 {
