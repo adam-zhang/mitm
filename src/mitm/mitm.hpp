@@ -24,33 +24,33 @@
 #define FR_INRA_MITM_MITM_HPP
 
 #if defined _WIN32 || defined __CYGWIN__
-    #define MITM_HELPER_DLL_IMPORT __declspec(dllimport)
-    #define MITM_HELPER_DLL_EXPORT __declspec(dllexport)
-    #define MITM_HELPER_DLL_LOCAL
+#define MITM_HELPER_DLL_IMPORT __declspec(dllimport)
+#define MITM_HELPER_DLL_EXPORT __declspec(dllexport)
+#define MITM_HELPER_DLL_LOCAL
 #else
-    #if __GNUC__ >= 4
-        #define MITM_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
-        #define MITM_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
-        #define MITM_HELPER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-    #else
-        #define MITM_HELPER_DLL_IMPORT
-        #define MITM_HELPER_DLL_EXPORT
-        #define MITM_HELPER_DLL_LOCAL
-    #endif
+#if __GNUC__ >= 4
+#define MITM_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
+#define MITM_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
+#define MITM_HELPER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+#define MITM_HELPER_DLL_IMPORT
+#define MITM_HELPER_DLL_EXPORT
+#define MITM_HELPER_DLL_LOCAL
+#endif
 #endif
 
 #ifdef MITM_DLL
-    #ifdef libmitm_EXPORTS
-        #define MITM_API MITM_HELPER_DLL_EXPORT
-    #else
-        #define MITM_API MITM_HELPER_DLL_IMPORT
-    #endif
-    #define MITM_LOCAL MITM_HELPER_DLL_LOCAL
-    #define MITM_MODULE MITM_HELPER_DLL_EXPORT
+#ifdef libmitm_EXPORTS
+#define MITM_API MITM_HELPER_DLL_EXPORT
 #else
-    #define MITM_API
-    #define MITM_LOCAL
-    #define MITM_MODULE MITM_HELPER_DLL_EXPORT
+#define MITM_API MITM_HELPER_DLL_IMPORT
+#endif
+#define MITM_LOCAL MITM_HELPER_DLL_LOCAL
+#define MITM_MODULE MITM_HELPER_DLL_EXPORT
+#else
+#define MITM_API
+#define MITM_LOCAL
+#define MITM_MODULE MITM_HELPER_DLL_EXPORT
 #endif
 
 #include <stdexcept>
