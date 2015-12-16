@@ -90,20 +90,17 @@ typedef std::vector<int> x_type;
 class MITM_API SimpleState
 {
 public:
-    void init(index m, index n)
-    {
-        try {
-            a.resize(m * n);
-            b.resize(m);
-            c.resize(n);
-        } catch(const std::bad_alloc& e) {
-            std::vector<bool>().swap(a);
-            std::vector<int>().swap(b);
-            std::vector<real>().swap(c);
+    /** Try to initialize the constraints matrix @e A, equalities and costs
+     * vectors @b and @c.
+     *
+     * return 0 if success otherwise -EDOM if m and n are bad or -ENOMEM if
+     * not enough memory.
+     */
+    int init(index m, index n) noexcept;
 
-            throw std::runtime_error("not enough memory");
-        }
-    }
+    index constraints() const noexcept;
+
+    index variables() const noexcept;
 
     std::vector<bool> a;
     std::vector<int> b;
@@ -164,6 +161,39 @@ MITM_API result
 heuristic_algorithm(const NegativeCoefficient& s, index limit,
                     real kappa, real delta, real theta,
                     const std::string &impl);
+
+
+inline int
+SimpleState::init(index m, index n) noexcept
+{
+    if (m <= 0 or n <= 0)
+        return -EDOM;
+
+    try {
+        a.resize(m * n);
+        b.resize(m);
+        c.resize(n);
+    } catch(const std::bad_alloc& e) {
+        std::vector<bool>().swap(a);
+        std::vector<int>().swap(b);
+        std::vector<real>().swap(c);
+        return -ENOMEM;
+    }
+
+    return 0;
+}
+
+inline index
+SimpleState::constraints() const noexcept
+{
+    return static_cast<index>(b.size());
+}
+
+inline index
+SimpleState::variables() const noexcept
+{
+    return static_cast<index>(c.size());
+}
 
 }
 

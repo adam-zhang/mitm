@@ -157,8 +157,24 @@ main(int argc, char *argv[])
                 continue;
             }
 
-            mitm::heuristic_algorithm(state, option_limit, delta,
-                                      kappa, theta, std::string{});
+            mitm::result r = mitm::heuristic_algorithm(state, option_limit,
+                                                       delta, kappa, theta,
+                                                       std::string{});
+            std::cout << "solution found in " << r.loop << " loops\n";
+            for (mitm::index i = 0; i != state.variables(); ++i) {
+                std::cout << r.x[i] << ' ';
+                if ((i + 1) % (state.constraints() / 2) == 0)
+                    std::cout << '\n';
+            }
+            std::cout << '\n';
+
+            for (mitm::index i = 0; i != state.variables(); ++i) {
+                std::cout << state.c[i] << ' ';
+                if ((i + 1) % (state.constraints() / 2) == 0)
+                    std::cout << '\n';
+            }
+
+
         } catch (const std::exception &e) {
             std::cerr << "/!\\ fail: " << e.what() << '\n';
         }
