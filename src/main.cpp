@@ -40,6 +40,21 @@ help_show() noexcept
               << "-k kappa     kappa init value [0..1[ (float)\n"
               << "-d delta     delta value [0..+oo[ (float)\n"
               << "-t theta     theta value [0..1] (float)\n"
+              << '\n'
+              << "File format: (text file)\n"
+              << " # ... are comments\n"
+              << " [format (int), default 0]\n"
+              << " [m constraints (int)] [n variables (int)]\n"
+              << " [constraint matrix (m * n boolean)]\n"
+              << " [equality vector (m int)]\n"
+              << " [cost vector (n int)]\n"
+              << '\n'
+              << "Example:\n"
+              << "0               # model index\n"
+              << "2 3             # constraints and variables numbers\n"
+              << "1 0 0 1 1 1     # 2*3 constraints matrix A\n"
+              << "1 1             # 2 vector B\n"
+              << "27.3 48.1 0.19  # 3 vector C (costs)\n"
               << std::endl;
 }
 
