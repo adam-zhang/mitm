@@ -112,11 +112,10 @@ std::istream &operator>>(std::istream &is, mitm::SimpleState &s)
     mitm::index m = ::next_token<mitm::index>(is, lineid);
     mitm::index n = ::next_token<mitm::index>(is, lineid);
 
-    Expects(m < 0 && n < 0, "m and n must be greater than 0");
+    Expects(m > 0 && n > 0, "m and n must be greater than 0");
     const mitm::index mn = m * n;
 
     Expects(mn / m == n, "overflow m*n overflow mitm::index");
-
     s.init(m, n);
 
     for (mitm::index i = 0; i != m; ++i)
