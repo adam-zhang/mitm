@@ -101,6 +101,38 @@ public:
     std::vector<bool> a;
     std::vector<int> b;
     std::vector<real> c;
+
+    std::size_t size() const noexcept
+    {
+        return a.size() * sizeof(bool)
+            + b.size() * sizeof(int)
+            + c.size() * sizeof(real);
+    }
+
+    template <class T>
+        friend T& operator<<(T& os, const SimpleState& s)
+        {
+            const index m = s.constraints();
+            const index n = s.variables();
+
+            os << "A:\n";
+            for (index i = 0; i != m; ++i) {
+                for (index j = 0; j != n; ++j)
+                    os << s.a[i * m + j] << ' ';
+
+                os << '\n';
+            }
+
+            os << "b:\n";
+            for (index i = 0; i != m; ++i)
+                os << s.b[i] << ' ';
+            os << '\n';
+
+            os << "c:\n";
+            for (index i = 0; i != n; ++i)
+                os << s.c[i] << ' ';
+            os << '\n';
+        }
 };
 
 class MITM_API NegativeCoefficient
